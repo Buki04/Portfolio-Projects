@@ -1,3 +1,4 @@
+-- Data Exploration of Covid 19 data
 SELECT
   *
 FROM
@@ -10,6 +11,8 @@ ORDER BY
   -- select *
   -- from portfolio-projects-399621.Covidvaccination.Covid_vaccination
   -- order by 3,4
+
+-- Select Data that we are going to be starting with
 SELECT
   location,
   date,
@@ -24,8 +27,10 @@ WHERE
 ORDER BY
   1,
   2;
-  -- Total deaths vs Total cases of each location
-  -- shows the chances of dying if infected by covid in each country
+  
+-- Total deaths vs. Total cases of each location
+-- shows the chances of dying if infected by COVID in each country
+
 SELECT
   location,
   date,
@@ -39,8 +44,10 @@ WHERE
 ORDER BY
   1,
   2;
-  -- looking at Total cases vs Population
-  -- shows the percentage of the population infectd by covid
+
+-- looking at Total cases vs. Population
+-- shows the percentage of the population infected by COVID
+
 SELECT
   location,
   date,
@@ -55,7 +62,9 @@ WHERE
 ORDER BY
   1,
   2;
-  -- Looking at the country with the highest infection rate
+ 
+-- Looking at the country with the highest infection rate
+
 SELECT
   location,
   population,
@@ -74,7 +83,9 @@ GROUP BY
   year
 ORDER BY
   infectedpop_percentage DESC;
-  -- Looking at countries with the highest deaths per population
+
+-- Looking at countries with the highest deaths per population
+
 SELECT
   location,
   MAX(total_deaths) AS highestdeathcount
@@ -86,8 +97,10 @@ GROUP BY
   location
 ORDER BY
   highestdeathcount DESC;
-  -- Looking at data Globally
-  -- Showing continent with the highest death count
+
+-- Looking at data Globally
+-- Showing the continent with the highest death count
+
 SELECT
   continent,
   MAX(total_deaths) AS highestdeathcount
@@ -99,8 +112,10 @@ GROUP BY
   continent
 ORDER BY
   highestdeathcount DESC;
-  --Looking at the global numbers
-  --Showing the death percentage globally
+ 
+--Looking at the global numbers
+--Showing the death percentage globally
+
 SELECT
   SUM(new_cases) AS totalcases,
   SUM(new_deaths) AS totaldeaths,
@@ -113,8 +128,10 @@ WHERE
 ORDER BY
   1,
   2;
-  --Total vaccination vs Population
-  --Showing the join of the two data sets to explore total vaccination vs the populatio of each location
+  
+--Total vaccination vs Population
+--Showing the join of the two data sets to explore total vaccination vs. the population of each location
+
 SELECT
   dea.continent,
   dea.location,
@@ -134,7 +151,8 @@ WHERE
 ORDER BY
   2,
   4;
-  --create a temp table to continue exploration of population vs vaccination
+ 
+--create a temp table to continue the exploration of population vs. vaccination
   CREATE TEMP TABLE popvsvacc AS
 SELECT
   dea.continent,
@@ -152,6 +170,10 @@ ON
   AND dea.date = vacc.date
 WHERE
   dea.continent IS NOT NULL;
+
+-- Using the temp table as our new dataset
+-- Discover the percentage of the population vaccinated per location 
+
 SELECT
   *,
   (Rollingvaccinations/population)*100 AS percent_pop_vaccinated,
