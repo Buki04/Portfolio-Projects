@@ -1,0 +1,99 @@
+-- Cleaning Nashville Housing Data 
+SELECT *
+  FROM Nashville_Housing;
+
+-- Extract the date from the SaleDate column 
+SELECT SaleDate, SUBSTR(SaleDate, 1, INSTR(SaleDate, (' '))-1) AS SaleDate_extracted 
+  FROM Nashville_Housing;
+  
+-- Update the table with the new date formatt 
+UPDATE Nashville_Housing
+SET SaleDate = SUBSTR(SaleDate, 1, INSTR(SaleDate, (' '))-1);
+
+-- Populate the Property and Owner Address that are Null
+-- Noticed that owner address is the same as property address
+SELECT *
+  FROM Nashville_Housing
+  ORDER BY ParcelID;
+
+SELECT ParcelID, PropertyAddress, OwnerAddress, IFNULL(PropertyAddress,OwnerAddress) AS PropertyAddress_popu
+  FROM Nashville_Housing
+  WHERE PropertyAddress is Null;
+  
+SELECT ParcelID, PropertyAddress, OwnerAddress, IFNULL(OwnerAddress,PropertyAddress) AS OwnerAddress_popu
+  FROM Nashville_Housing
+  WHERE OwnerAddress is Null;
+
+UPDATE Nashville_Housing
+SET PropertyAddress = IFNULL(PropertyAddress,OwnerAddress);
+
+UPDATE Nashville_Housing
+SET OwnerAddress = IFNULL(OwnerAddress,PropertyAddress);
+  
+-- Breaking out Address into Individual Columns (Address, City, State)
+SELECT PropertyAddress, SUBSTR(PropertyAddress, 1, INSTR(PropertyAddress, ',')-1) AS PropertyAddress, 
+SUBSTR(PropertyAddress, INSTR(PropertyAddress, ',')+1, LENGTH(PropertyAddress)) AS PropertyCity
+  FROM Nashville_Housing;
+
+-- Add the split address to the Nashville Housing dataset
+Alter Table Nashville_Housing
+ADD PropertySplitAddress Text;
+
+UPDATE Nashville_Housing
+SET PropertySplitAddress = SUBSTR(PropertyAddress, 1, INSTR(PropertyAddress, ',')-1);
+
+Alter Table Nashville_Housing
+ADD PropertySplitCity Text;
+
+UPDATE Nashville_Housing
+SET PropertySplitCity = SUBSTR(PropertyAddress, INSTR(PropertyAddress, ',')+1, LENGTH(PropertyAddress));
+
+-- Change 'Y' and 'N' to 'Yes' and 'No' 
+
+SELECT SoldAsVacant, COUNT(SoldAsVacant) 
+  FROM Nashville_Housing
+  GROUP BY SoldAsVacant
+  ORDER BY 2
+  
+SELECT SoldAsVacant,
+       CASE WHEN SoldAsVacant = 'Y' THEN 'Yes' 
+       WHEN SoldAsVacant = 'N' THEN 'No' 
+       ELSE SoldAsVacant 
+       END AS SoldAsVacant_fixed
+  FROM Nashville_Housing;
+  
+UPDATE Nashville_Housing
+SET SoldAsVacant = CASE WHEN SoldAsVacant = 'Y' THEN 'Yes' 
+       WHEN SoldAsVacant = 'N' THEN 'No' 
+       ELSE SoldAsVacant 
+       END;
+
+-- Remove Duplicates 
+WITH rownumCTE AS (
+SELECT *,
+       ROW_NUMBER() OVER (PARTITION BY ParcelID,
+       PropertyAddress,
+       SalePrice,
+       SaleDate,
+       LegalReference) row_num
+  FROM Nashville_Housing
+ORDER BY ParcelID;
+)
+
+SELECT *
+  FROM rownumCTE
+  WHERE row_num >2;
+-- Our datasets does not have any duplicates
+
+-- Remove Unnecessary columns from dataset
+ SELECT *
+  FROM Nashville_Housing;
+
+ALTER TABLE Nashville_Housing
+DROP COLUMN PropertyAddress;
+
+ALTER TABLE Nashville_Housing
+DROP COLUMN TaxDistrict;
+
+ALTER TABLE Nashville_Housing
+DROP COLUMN SaleDate
