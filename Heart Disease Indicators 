@@ -1,0 +1,254 @@
+-- Objective: To conduct an in-depth analysis of a dataset sourced from the Centers for Disease Control and Prevention (CDC) pertaining to heart disease and its potential influencing factors.
+
+-- Goal: The primary aim of this analysis is to identify and elucidate the variables that exert a statistically significant impact on the likelihood of heart disease occurrence.
+
+SELECT *
+  FROM [Heart disease];
+  
+-- Find the total number of people with or without a heart disease.  
+SELECT 
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease];
+  
+-- In this dataset, Smokers have atleast 100 cigarettes (5 pcks)/day 
+
+-- Find the number of smokers and non-smokers that have a heart disease vs those without heart disease. 
+--Using subqueries we find the percentage of smokers and non-smokers that have heart disease. 
+
+SELECT Smoking, 
+Heartdisease_yes_count,
+Heartdisease_no_count,
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentHDvsSmoking,
+ROUND ((CAST(Heartdisease_no_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentSmkngwthoutHD
+FROM 
+(
+SELECT Smoking,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY Smoking
+  )
+  ORDER BY 4 DESC;
+
+-- In this dataset Alcohol drinkers are classified as adult men having more than14 drinks per week and adult women having more than 7 drinks per week.
+
+-- Find the number of alcohol drinkers and non-alcohol drinkers that have a heart disease vs those without heart disease. 
+--Using subqueries we find the percentage of alcohol drinkers and non-alcohol drinkers that have heart disease.
+
+SELECT AlcoholDrinking, 
+Heartdisease_yes_count,
+Heartdisease_no_count,
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentHDvsAD,
+ROUND ((CAST(Heartdisease_no_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentADwthoutHD
+FROM 
+(
+SELECT AlcoholDrinking,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY AlcoholDrinking
+  )
+  ORDER BY 4 DESC;
+
+-- Find the number of alcohol drinkers and smokers that have heart disease vs those that don't have a heart disease. 
+-- This would allow us to discover if there is high liklihood of having heart disease if the individual is an alcohol drinker and also smokes.
+SELECT AlcoholDrinking, 
+Smoking, 
+Heartdisease_yes_count, 
+Heartdisease_no_count, 
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentwthHD,
+ROUND ((CAST(Heartdisease_no_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentwthoutHD
+FROM 
+(SELECT AlcoholDrinking, Smoking,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  WHERE AlcoholDrinking = 'Yes' AND Smoking = 'Yes');
+ 
+
+-- Now we analyze the number of individuals with heart disease based on sex. 
+SELECT sex, 
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentSwthHD,
+ROUND ((CAST(Heartdisease_no_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentSwthoutHD
+FROM
+( SELECT Sex,  
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY Sex
+  ORDER BY 2 DESC, 3 DESC);
+ 
+---- Now we analyze the number of individuals with heart disease based on Race. 
+
+  
+-- Here we try to find any pattern of individuals with heart disease based sex, race and gender. 
+SELECT Sex, Race, AgeCategory,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY AgeCategory, Race, Sex 
+  ORDER BY 2, 3 DESC, 4 DESC, 5 DESC;
+  
+-- Physical health is defined as the number of times an individual has reported a physical injury or illness within the past 30 days.
+--The physical health of an individual is analyzed in depth to determine how likely it affects heart disease.
+SELECT CAST (PhysicalHealth AS REAL ),
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY PhysicalHealth
+  ORDER BY 2 DESC ;
+
+-- Mental Health is defined as the number of days an individual's mental health was not goos within the past 30 days.
+-- The Mental health of an individual is analyzed in depth to determine how likely it affects heart disease.
+SELECT CAST (MentalHealth AS INT),
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY MentalHealth
+  ORDER BY 2 DESC;
+
+
+-- Looking at how body mass index and the liklihood of having heart disease. 
+SELECT BMI,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY BMI
+  ORDER BY 1 DESC;
+
+
+-- Here we find if there are any Correlation of an individual's general health with heart disease 
+SELECT GenHealth, 
+Heartdisease_yes_count,
+Heartdisease_no_count,
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentHDvsGenHealth
+FROM 
+(
+SELECT GenHealth,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY GenHealth
+  )
+  ORDER BY 4 DESC;
+  
+-- Here we try to find if there is any relationship between having stroke and heart disease 
+SELECT Stroke,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY Stroke
+  ORDER BY 2 DESC;
+  
+ 
+SELECT Stroke, 
+Heartdisease_yes_count,
+Heartdisease_no_count,
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentHDvsStroke
+FROM 
+(
+SELECT Stroke,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY Stroke
+  )
+  ORDER BY 4 DESC;
+ 
+-- Another variable collected in the survey was the difficulty of walking or climbing the stairs.
+-- Here we test if a=difficulty walking had an effect on heart disease.
+SELECT DiffWalking, 
+Heartdisease_yes_count,
+Heartdisease_no_count,
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentHDvsDiffWalking
+FROM 
+( 
+SELECT DiffWalking,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY DiffWalking
+  ORDER BY 2 DESC
+  );
+  
+
+-- Looking at the number of hours of sleep time and its correlation to heart disease
+SELECT SleepTime, 
+Heartdisease_yes_count,
+Heartdisease_no_count,
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentHDvsSleepTime
+FROM 
+( 
+SELECT SleepTime,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY SleepTime
+  ORDER BY 2 DESC
+  )
+  ORDER BY 4 DESC;
+  
+-- Here we try to find if there is any relationship between being diabetic and heart disease 
+SELECT Diabetic, 
+Heartdisease_yes_count,
+Heartdisease_no_count,
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentHDvsDiabetic
+FROM 
+( 
+SELECT Diabetic,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY Diabetic
+  ORDER BY 2 DESC
+  )
+  ORDER BY 4 DESC;
+ 
+-- Another variable we tested was Asthma and if there are any correlation to having heart disease 
+SELECT Asthma, 
+Heartdisease_yes_count,
+Heartdisease_no_count,
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentHDvsAsthma
+FROM 
+( 
+SELECT Asthma,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY Asthma
+  ORDER BY 2 DESC
+  )
+  ORDER BY 4 DESC;
+  
+-- Do individuals with Kidney Disease have a highere chance of having hear disease?
+SELECT KidneyDisease, 
+Heartdisease_yes_count,
+Heartdisease_no_count,
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentHDvsKidneydisease
+FROM 
+( 
+SELECT KidneyDisease,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY KidneyDisease
+  ORDER BY 2 DESC
+  )
+  ORDER BY 4 DESC;
+
+-- Do individuals with Skin Cancer have a highere chance of having hear disease?
+SELECT SkinCancer, 
+Heartdisease_yes_count,
+Heartdisease_no_count,
+ROUND ((CAST(Heartdisease_yes_count AS REAL) / (Heartdisease_yes_count + Heartdisease_no_count)) * 100, 2 ) AS percentHDvsSkincancer
+FROM 
+( 
+SELECT SkinCancer,
+SUM(CASE WHEN HeartDisease = 'Yes' THEN 1 ELSE 0 END) AS Heartdisease_yes_count,
+SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
+  FROM [Heart disease]
+  GROUP BY SkinCancer
+  ORDER BY 2 DESC
+  )
+  ORDER BY 4 DESC;
