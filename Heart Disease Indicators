@@ -156,8 +156,8 @@ SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
   )
   ORDER BY 4 DESC;
  
--- Another variable collected in the survey was the difficulty of walking or climbing the stairs.
--- Here we test if a=difficulty walking had an effect on heart disease.
+-- Another variable collected in the survey was difficulty walking or climbing the stairs.
+-- Here we test if difficulty walking had an effect on heart disease.
 SELECT DiffWalking, 
 Heartdisease_yes_count,
 Heartdisease_no_count,
@@ -205,7 +205,7 @@ SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
   )
   ORDER BY 4 DESC;
  
--- Another variable we tested was Asthma and if there are any correlation to having heart disease 
+-- Another variable we tested was Asthma and if there is any correlation to having heart disease 
 SELECT Asthma, 
 Heartdisease_yes_count,
 Heartdisease_no_count,
@@ -221,7 +221,7 @@ SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
   )
   ORDER BY 4 DESC;
   
--- Do individuals with Kidney Disease have a highere chance of having hear disease?
+-- Do individuals with Kidney Disease have a higher chance of having heart disease?
 SELECT KidneyDisease, 
 Heartdisease_yes_count,
 Heartdisease_no_count,
@@ -237,7 +237,7 @@ SUM(CASE WHEN HeartDisease = 'No' THEN  1 ELSE 0 END) AS Heartdisease_no_count
   )
   ORDER BY 4 DESC;
 
--- Do individuals with Skin Cancer have a highere chance of having hear disease?
+-- Do individuals with Skin Cancer have a higher chance of having heart disease?
 SELECT SkinCancer, 
 Heartdisease_yes_count,
 Heartdisease_no_count,
